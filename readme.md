@@ -6,6 +6,10 @@ Competition!
 -------
 The guys at ChallengePost are running a competition to design and build a personal dashboard using Chart.js, and are offering some great prizes for winning. Take a look at [chartjs.challengepost.com](http://chartjs.challengepost.com/).
 
+Pull Requests Included 
+-------
+* Tooltips (see Branch [tooltips](https://github.com/Regaddi/Chart.js/tree/tooltips))
+
 Documentation
 -------
 You can find documentation at [chartjs.org/docs](http://www.chartjs.org/docs).
