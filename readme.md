@@ -9,6 +9,7 @@ The guys at ChallengePost are running a competition to design and build a person
 Pull Requests Included 
 -------
 * Tooltips (see Branch [tooltips](https://github.com/Regaddi/Chart.js/tree/tooltips))
+* Scale as integers [Issue 58](https://github.com/nnnick/Chart.js/issues/58)
 
 Documentation
 -------

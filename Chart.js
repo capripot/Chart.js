@@ -607,6 +607,7 @@ window.Chart = function(context, options){
 			scaleShowGridLines : true,
 			scaleGridLineColor : "rgba(0,0,0,.05)",
 			scaleGridLineWidth : 1,
+      scaleInt: false,
 			bezierCurve : true,
 			pointDot : true,
 			pointDotRadius : 4,
@@ -1200,7 +1201,7 @@ window.Chart = function(context, options){
 		labelTemplateString = (config.scaleShowLabels)? config.scaleLabel : "";
 		if (!config.scaleOverride){
 			
-			calculatedScale = calculateScale(scaleHeight,valueBounds.maxSteps,valueBounds.minSteps,valueBounds.maxValue,valueBounds.minValue,labelTemplateString);
+			calculatedScale = calculateScale(scaleHeight,valueBounds.maxSteps,valueBounds.minSteps,valueBounds.maxValue,valueBounds.minValue,labelTemplateString, config.scaleInt);
 		}
 		else {
 			calculatedScale = {
@@ -1700,7 +1701,7 @@ window.Chart = function(context, options){
 			};
 	})();
 
-	function calculateScale(drawingHeight,maxSteps,minSteps,maxValue,minValue,labelTemplateString){
+	function calculateScale(drawingHeight,maxSteps,minSteps,maxValue,minValue,labelTemplateString,integer){
 		var graphMin,graphMax,graphRange,stepValue,numberOfSteps,valueRange,rangeOrderOfMagnitude,decimalNum;
 		valueRange = maxValue - minValue;
 		rangeOrderOfMagnitude = calculateOrderOfMagnitude(valueRange);
@@ -1711,9 +1712,12 @@ window.Chart = function(context, options){
 		numberOfSteps = Math.round(graphRange / stepValue);
 	        
 		//Compare number of steps to the max and min for that size graph, and add in half steps if need be.	        
-		while(numberOfSteps < minSteps || numberOfSteps > maxSteps) {
+		while((numberOfSteps < minSteps || numberOfSteps > maxSteps) && (stepValue > 1 || !integer)) {
 			if (numberOfSteps < minSteps){
-				stepValue /= 2;
+        if(integer)
+          stepValue = Math.round(stepValue / 2);
+        else
+          stepValue /= 2;
 				numberOfSteps = Math.round(graphRange/stepValue);
 			}
 			else{
