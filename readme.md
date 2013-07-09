@@ -10,6 +10,7 @@ Pull Requests Included
 -------
 * Tooltips (see Branch [tooltips](https://github.com/Regaddi/Chart.js/tree/tooltips))
 * Scale as integers [Issue 58](https://github.com/nnnick/Chart.js/issues/58)
+* stacked bar [Issue 168](https://github.com/nnnick/Chart.js/pull/168)
 
 Documentation
 -------

@@ -412,6 +412,7 @@ window.Chart = function(context, options){
 			chart.savedState = chart.savedState == null ? context.getImageData(0,0,context.canvas.width,context.canvas.height) : chart.savedState;
 			var rendered = 0;
 			for(var i in chart.tooltips) {
+        if (i === 'length' || !chart.tooltips.hasOwnProperty(i)) continue;
 				var position = getPosition(context.canvas),
 					mx = (e.clientX)-position.x,
 					my = (e.clientY)-position.y;
@@ -652,7 +653,8 @@ window.Chart = function(context, options){
 			animationSteps : 60,
 			animationEasing : "easeOutQuart",
 			onAnimationComplete : null,
-			showTooltips : true
+			showTooltips : true,
+			stacked : false
 		};		
 		var config = (options) ? mergeChartConfig(chart.Bar.defaults,options) : chart.Bar.defaults;
 		
@@ -1458,23 +1460,32 @@ window.Chart = function(context, options){
 		
 		function drawBars(animPc){
 			ctx.lineWidth = config.barStrokeWidth;
+			var barOffset = 0;
+			var yOffset = new Array();
+			for(j=0; j<data.labels.length; j++){
+				yOffset[j] = 0;
+			}
+			var barHeight = 0;
 			for (var i=0; i<data.datasets.length; i++){
-					ctx.fillStyle = data.datasets[i].fillColor;
-					ctx.strokeStyle = data.datasets[i].strokeColor;
+				ctx.fillStyle = data.datasets[i].fillColor;
+				ctx.strokeStyle = data.datasets[i].strokeColor;
 				for (var j=0; j<data.datasets[i].data.length; j++){
-					var barOffset = yAxisPosX + config.barValueSpacing + valueHop*j + barWidth*i + config.barDatasetSpacing*i + config.barStrokeWidth*i;
-					
+					barHeight = animPc*calculateOffset(data.datasets[i].data[j],calculatedScale,scaleHop);
+					barOffset = yAxisPosX + config.barValueSpacing + valueHop*j;
+					if(!config.stacked){
+						barOffset += barWidth*i + config.barDatasetSpacing*i + config.barStrokeWidth*i;
+					}
 					ctx.beginPath();
-					ctx.moveTo(barOffset, xAxisPosY);
-					ctx.lineTo(barOffset, xAxisPosY - animPc*calculateOffset(data.datasets[i].data[j],calculatedScale,scaleHop)+(config.barStrokeWidth/2));
-					ctx.lineTo(barOffset + barWidth, xAxisPosY - animPc*calculateOffset(data.datasets[i].data[j],calculatedScale,scaleHop)+(config.barStrokeWidth/2));
-					ctx.lineTo(barOffset + barWidth, xAxisPosY);
+					ctx.moveTo(barOffset, xAxisPosY - yOffset[j]);
+					ctx.lineTo(barOffset, xAxisPosY - yOffset[j] - barHeight + (config.barStrokeWidth/2));
+					ctx.lineTo(barOffset + barWidth, xAxisPosY - yOffset[j] - barHeight + (config.barStrokeWidth/2));
+					ctx.lineTo(barOffset + barWidth, xAxisPosY - yOffset[j]);
 					if(config.barShowStroke){
 						ctx.stroke();
 					}
 					ctx.closePath();
 					ctx.fill();
-
+          
 					if(animPc >= 1 && config.showTooltips) {
 						// register tooltips
 						var x = barOffset,
@@ -1482,7 +1493,12 @@ window.Chart = function(context, options){
 							y = xAxisPosY-height,
 							width = barWidth;
 						registerTooltip(ctx,{type:'rect',x:x,y:y,width:width,height:height},{label:data.labels[j],value:data.datasets[i].data[j]},'Bar');
+          }
+          
+					if(config.stacked){
+						yOffset[j] += barHeight;
 					}
+          
 				}
 			}
 			
@@ -1572,8 +1588,12 @@ window.Chart = function(context, options){
 			}
 			xAxisLength = width - longestText - widestXLabel;
 			valueHop = Math.floor(xAxisLength/(data.labels.length));	
-			
-			barWidth = (valueHop - config.scaleGridLineWidth*2 - (config.barValueSpacing*2) - (config.barDatasetSpacing*data.datasets.length-1) - ((config.barStrokeWidth/2)*data.datasets.length-1))/data.datasets.length;
+			if(config.stacked){
+				barWidth = valueHop - config.scaleGridLineWidth*2 - (config.barValueSpacing*2) - ((config.barStrokeWidth/2)*data.datasets.length-1);
+			}
+			else{
+				barWidth = (valueHop - config.scaleGridLineWidth*2 - (config.barValueSpacing*2) - (config.barDatasetSpacing*data.datasets.length-1) - ((config.barStrokeWidth/2)*data.datasets.length-1))/data.datasets.length;
+			}
 			
 			yAxisPosX = width-widestXLabel/2-xAxisLength;
 			xAxisPosY = scaleHeight + config.scaleFontSize/2;				
@@ -1620,13 +1640,29 @@ window.Chart = function(context, options){
 		function getValueBounds() {
 			var upperValue = Number.MIN_VALUE;
 			var lowerValue = Number.MAX_VALUE;
-			for (var i=0; i<data.datasets.length; i++){
-				for (var j=0; j<data.datasets[i].data.length; j++){
-					if ( data.datasets[i].data[j] > upperValue) { upperValue = data.datasets[i].data[j] };
-					if ( data.datasets[i].data[j] < lowerValue) { lowerValue = data.datasets[i].data[j] };
+			if (config.stacked){
+				var sum = new Array();
+				for (var j=0; j<data.labels.length; j++){
+					sum[j] = 0;
 				}
+				for (var i=0; i<data.datasets.length; i++){
+					for (var j=0; j<data.datasets[i].data.length; j++){
+						sum[j] += data.datasets[i].data[j];
+					}
+				};
+				for (var j=0; j<data.labels.length; j++){
+					if ( sum[j] > upperValue) { upperValue = sum[j] };
+					if ( sum[j] < lowerValue) { lowerValue = sum[j] };
+				}
+			}
+			else{
+				for (var i=0; i<data.datasets.length; i++){
+					for (var j=0; j<data.datasets[i].data.length; j++){
+						if ( data.datasets[i].data[j] > upperValue) { upperValue = data.datasets[i].data[j] };
+						if ( data.datasets[i].data[j] < lowerValue) { lowerValue = data.datasets[i].data[j] };
+					}
+				};
 			};
-	
 			var maxSteps = Math.floor((scaleHeight / (labelHeight*0.66)));
 			var minSteps = Math.floor((scaleHeight / labelHeight*0.5));
 			
