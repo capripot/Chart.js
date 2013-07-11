@@ -40,7 +40,9 @@
 			
   		}
 
-  	var myLine = new Chart(document.getElementById("canvas").getContext("2d")).Line(lineChartData,
+  	var myLine = new Chart(document.getElementById("canvas").getContext("2d"), {
+  	  tooltips: {timeEventLabelTemplate: "Time event of <%=label%>: <%=value%>"}
+  	}).Line(lineChartData,
       {
         animation : false,
         timeEvents: true

@@ -154,6 +154,7 @@ window.Chart = function(context, options){
 			fontColor: 'white',
 			fontSize: '12px',
 			labelTemplate: '<%=label%>: <%=value%>',
+      timeEventLabelTemplate: '<%=label%>: <%=value%>',
 			height: 24,
 			padding: {
 				top: 4,
@@ -272,9 +273,9 @@ window.Chart = function(context, options){
 					this.ctx.putImageData(this.highlightState,0,0);
 				}
 			}
-			var posX = x+options.tooltips.offset.left,
+    	var posX = x+options.tooltips.offset.left,
 				posY = y+options.tooltips.offset.top,
-				tpl = tmpl(options.tooltips.labelTemplate, this.data),
+				tpl = tmpl((type == 'TimeEvent' ? options.tooltips.timeEventLabelTemplate : options.tooltips.labelTemplate), this.data),
 				rectWidth = options.tooltips.padding.left+this.ctx.measureText(tpl).width+options.tooltips.padding.right,
 				position = options.tooltips.position.split(" "),
 				height = options.tooltips.height;
@@ -1335,7 +1336,7 @@ window.Chart = function(context, options){
             },{
               label:data.labels[i],
               value:data.datasets[0].data[i]
-            },'Line');
+            },'TimeEvent');
           }
         }
         
