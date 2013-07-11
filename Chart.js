@@ -1220,7 +1220,7 @@ window.Chart = function(context, options){
 		animationLoop(config,drawScale,drawLines,ctx);
 		
 		function drawLines(animPc){
-			for (var i=0; i<data.datasets.length; i++){
+			for (var i=(config.timeEvents ? 1 : 0); i<data.datasets.length; i++){
 				ctx.strokeStyle = data.datasets[i].strokeColor;
 				ctx.lineWidth = config.datasetStrokeWidth;
 				ctx.beginPath();
@@ -1303,6 +1303,7 @@ window.Chart = function(context, options){
 					ctx.fillText(data.labels[i], yAxisPosX + i*valueHop,xAxisPosY + config.scaleFontSize+3);					
 				}
 
+
 				ctx.beginPath();
 				ctx.moveTo(yAxisPosX + i * valueHop, xAxisPosY+3);
 				
@@ -1316,6 +1317,29 @@ window.Chart = function(context, options){
 					ctx.lineTo(yAxisPosX + i * valueHop, xAxisPosY+3);				
 				}
 				ctx.stroke();
+				
+        if(config.timeEvents && data.datasets[0].data && data.datasets[0].data[i] != ""){
+  				ctx.beginPath();
+  				ctx.moveTo(yAxisPosX + i * valueHop, xAxisPosY);
+					ctx.lineWidth = data.datasets[0].strokeWidth || 1;
+					ctx.strokeStyle = data.datasets[0].strokeColor;					
+					ctx.lineTo(yAxisPosX + i * valueHop, 5);
+          ctx.stroke();
+          if(config.showTooltips) {
+						registerTooltip(ctx,{
+              type:'rect',
+              x: yAxisPosX + i * valueHop - 2,
+              y: 5,
+              width: (data.datasets[0].strokeWidth || 1) + 4,
+              height: xAxisPosY
+            },{
+              label:data.labels[i],
+              value:data.datasets[0].data[i]
+            },'Line');
+          }
+        }
+        
+        
 			}
 			
 			//Y axis
@@ -1341,7 +1365,8 @@ window.Chart = function(context, options){
 				}
 				
 				ctx.stroke();
-				
+        
+        
 				if (config.scaleShowLabels){
 					ctx.fillText(calculatedScale.labels[j],yAxisPosX-8,xAxisPosY - ((j+1) * scaleHop));
 				}
